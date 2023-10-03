@@ -36,9 +36,12 @@ INTERFACES=$(($(capinfos $PCAPNG_FILE | grep Interface | wc -l | awk '{print $1}
 # Create separate pcapng files for each + creating respective pcaps after filtering on encap type
 mkdir $PCAPNG_DIR
 mkdir $PCAP_DIR
+# grep -A2 'Interface #8 info' | grep Encapsulation
 for (( FACE=0; FACE<$INTERFACES; FACE++ )); do
-    echo "Writing $FACE.pcap..."
-    tshark -r $PCAPNG_FILE -w $PCAPNG_DIR/$FACE.pcapng "frame.interface_id == $FACE"
+    ENCAP_TYPE=$(capinfos $PCAPNG_FILE | grep -A3 'Interface #'$FACE' info' | grep Encapsulation | grep -oe '([0-9].*-*[a-z]' | awk -F' ' '{print $3}')
+    FILE_NAME="$FACE"_"$ENCAP_TYPE"
+    echo "Writing $FILE_NAME.pcap..."
+    tshark -r $PCAPNG_FILE -w $PCAPNG_DIR/$FILE_NAME.pcapng "frame.interface_id == $FACE"
     # Convert pcapng files to pcap files
-    editcap -F pcap -T ether $PCAPNG_DIR/$FACE.pcapng $PCAP_DIR/$FACE.pcap
+    editcap -F pcap -T $ENCAP_TYPE $PCAPNG_DIR/$FILE_NAME.pcapng $PCAP_DIR/$FILE_NAME.pcap
 done 
