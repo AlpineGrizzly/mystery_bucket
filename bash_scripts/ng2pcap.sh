@@ -8,19 +8,15 @@ set -e
 PCAPNG_DIR="pcapng_files"
 PCAP_DIR="pcap_files"
 
-# Do we have an argument
-if [ -z "$1" ]; then
+# Check for valid filename argument and if the file exists
+if [ -z "$1" ] || [ ! -f "$1" ]; then
     echo "Usage ./ng2pcap.sh <pcapng_file>"
     exit
+else
+    PCAPNG_FILE=$1
 fi
 
-# Check if files exists    
-if [ -f "$1" ]; then
-    PCAPNG_FILE="$1"
-else
-    echo "Usage ./ng2pcap.sh <pcapng_file>"
-    exit
-fi
+echo "Reading from $1"
 
 if [ -d $PCAPNG_DIR ]; then 
     rm -rf $PCAPNG_DIR
